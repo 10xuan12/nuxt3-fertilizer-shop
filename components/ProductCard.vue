@@ -37,7 +37,7 @@
 </template>
 
 <script setup lang="ts">
-import { useWishlistStore } from '../store/wishlist'
+import { useWishlistStore } from '@/store/wishlist'
 import { computed } from 'vue'
 const props = defineProps({
   product: Object
