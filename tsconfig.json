@@ -20,13 +20,12 @@
       "nuxt.config.ts",
       "app.vue",
       "components/**/*.vue",
-      "composables/**/*.ts",
       "layouts/**/*.vue",
       "middleware/**/*.ts",
       "pages/**/*.vue",
       "plugins/**/*.ts",
-      "store/**/*.ts",
       "types/**/*.d.ts"
-    ]
+    ],
+    "exclude": []
   }
   

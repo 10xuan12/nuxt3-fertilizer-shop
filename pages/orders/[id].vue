@@ -1,73 +1,92 @@
 <template>
-  <div class="container mx-auto p-4 max-w-2xl">
-    <h1 class="text-3xl font-bold mb-6">訂單詳情</h1>
-    <div v-if="!order" class="text-gray-500">查無此訂單。</div>
-    <div v-else class="bg-white rounded shadow p-6">
-      <div class="mb-4">
-        <div class="font-semibold">訂單編號：{{ order.id }}</div>
-        <div class="text-gray-500 text-sm">下單日期：{{ order.date }}</div>
-        <div class="mt-2">
-          <span class="inline-block px-3 py-1 rounded-full text-xs font-bold"
-            :class="order.status === '已完成' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'">
+  <div class="container py-4">
+    <button class="btn btn-outline-secondary mb-3" @click="goBack">← 返回訂單列表</button>
+    <div v-if="order" class="order-detail-card mx-auto">
+      <h2 class="mb-3">訂單詳情</h2>
+      <div class="row mb-2">
+        <div class="col-6"><strong>訂單編號：</strong>{{ order.id }}</div>
+        <div class="col-6"><strong>下單時間：</strong>{{ order.date }}</div>
+      </div>
+      <div class="row mb-2">
+        <div class="col-6"><strong>訂購人：</strong>{{ order.customer }}</div>
+        <div class="col-6"><strong>狀態：</strong>
+          <span :class="['badge',
+            order.status === '待出貨' ? 'bg-warning text-dark' :
+            order.status === '已出貨' ? 'bg-success' :
+            'bg-secondary']">
             {{ order.status }}
           </span>
         </div>
       </div>
-      <div class="mb-4">
-        <div class="font-medium mb-1">收件人資訊</div>
-        <div class="text-gray-700 text-sm">{{ order.receiver.name }} / {{ order.receiver.phone }}</div>
-        <div class="text-gray-700 text-sm">{{ order.receiver.address }}</div>
-      </div>
-      <div class="mb-4">
-        <div class="font-medium mb-1">付款方式</div>
-        <div class="text-gray-700 text-sm">{{ order.payment === 'credit' ? '信用卡' : '貨到付款' }}</div>
-      </div>
-      <div class="mb-4">
-        <div class="font-medium mb-1">商品明細</div>
-        <div v-for="item in order.items" :key="item.id" class="flex justify-between items-center border-b py-2">
-          <span>{{ item.name }} x {{ item.quantity }}</span>
-          <span>NT$ {{ item.price * item.quantity }}</span>
-        </div>
-      </div>
-      <div class="flex justify-between items-center font-bold text-lg mt-6">
-        <span>總計</span>
-        <span>NT$ {{ order.total }}</span>
-      </div>
-      <NuxtLink to="/orders" class="inline-block mt-8 px-6 py-2 bg-green-600 hover:bg-green-700 text-white rounded transition-all">返回訂單查詢</NuxtLink>
+      <div class="mb-2"><strong>收件人：</strong>{{ order.receiver }}</div>
+      <div class="mb-2"><strong>收件地址：</strong>{{ order.address }}</div>
+      <div class="mb-2"><strong>聯絡電話：</strong>{{ order.phone }}</div>
+      <hr />
+      <h5 class="mb-2">商品明細</h5>
+      <table class="table table-bordered align-middle">
+        <thead>
+          <tr>
+            <th>商品名稱</th>
+            <th>數量</th>
+            <th>單價</th>
+            <th>小計</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="item in order.items" :key="item.name">
+            <td>{{ item.name }}</td>
+            <td>{{ item.qty }}</td>
+            <td>${{ item.price }}</td>
+            <td>${{ item.qty * item.price }}</td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="text-end fs-5 fw-bold">總金額：${{ order.amount }}</div>
     </div>
+    <div v-else class="alert alert-danger">查無此訂單</div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { useRoute } from 'vue-router'
-const route = useRoute()
+import { useRoute, useRouter } from 'vue-router'
+import { ref } from 'vue'
 
-// 假資料，實際可改為 API 請求
-const allOrders = [
+const route = useRoute()
+const router = useRouter()
+
+// 假資料，實際可改為API取得
+const orders = [
   {
-    id: '20240701001',
-    date: '2024-07-01',
-    status: '已完成',
-    total: 1200,
-    payment: 'credit',
-    receiver: { name: '王小明', phone: '0912345678', address: '台北市信義區松山路1號' },
+    id: '20240601001', customer: '王小明', amount: 1200, status: '待出貨', date: '2024-06-01 10:23',
+    receiver: '王小明', address: '台北市信義區松山路1號', phone: '0912345678',
     items: [
-      { id: 1, name: '有機肥料 A', price: 300, quantity: 2 },
-      { id: 2, name: '液體肥料 B', price: 600, quantity: 1 }
+      { name: '有機肥料A', qty: 2, price: 500 },
+      { name: '複合肥料B', qty: 1, price: 200 }
     ]
   },
   {
-    id: '20240628002',
-    date: '2024-06-28',
-    status: '處理中',
-    total: 450,
-    payment: 'cod',
-    receiver: { name: '王小明', phone: '0912345678', address: '台北市信義區松山路1號' },
+    id: '20240601002', customer: '李小美', amount: 850, status: '已出貨', date: '2024-06-01 11:05',
+    receiver: '李小美', address: '新北市板橋區文化路2號', phone: '0922333444',
     items: [
-      { id: 3, name: '速效化肥 C', price: 450, quantity: 1 }
+      { name: '速效肥料C', qty: 1, price: 420 },
+      { name: '有機肥料A', qty: 1, price: 430 }
     ]
   }
 ]
 
-const order = allOrders.find(o => o.id === route.params.id)
-</script> 
+const order = ref(orders.find(o => o.id === route.params.id))
+
+function goBack() {
+  router.push('/orders')
+}
+</script>
+
+<style scoped>
+.order-detail-card {
+  background: #fff;
+  border-radius: 18px;
+  box-shadow: 0 2px 16px 0 rgba(44, 62, 80, 0.08);
+  padding: 2.5rem 2rem;
+  max-width: 600px;
+}
+</style> 
