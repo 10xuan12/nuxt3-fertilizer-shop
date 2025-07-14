@@ -1,6 +1,16 @@
 <template>
   <div class="container py-4">
     <h1 class="mb-4">主頁</h1>
+
+    <div v-if="loading" class="text-center my-5">
+      <div class="spinner-border" role="status">
+        <span class="visually-hidden">載入中...</span>
+      </div>
+    </div>
+
+    <div v-else-if="errorMsg" class="alert alert-danger">
+      {{ errorMsg }}
+    </div>
     
     <!-- 統計卡片 -->
     <div class="row g-4 mb-4">
@@ -39,7 +49,7 @@
       </div>
       <div class="col-md-3">
         <div class="stat-card card">
-          <div class="stat-icon bg-info">
+          <div class="stat-icon bg-danger">
             <i class="bi bi-people text-white"></i>
           </div>
           <div class="stat-content">
@@ -75,7 +85,7 @@
                 </NuxtLink>
               </div>
               <div class="col-6">
-                <button class="btn btn-outline-info w-100" @click="exportData">
+                <button class="btn btn-outline-danger w-100" @click="exportData">
                   <i class="bi bi-download me-2"></i>匯出報表
                 </button>
               </div>
@@ -109,19 +119,10 @@
     <!-- 圖表區域 -->
     <div class="row g-4">
       <div class="col-md-8">
-        <div class="card">
-          <div class="card-header">
-            <h5 class="card-title mb-0">銷售趨勢</h5>
-          </div>
+        <div class="card mb-4">
+          <div class="card-header">近六個月營收</div>
           <div class="card-body">
-            <div class="chart-placeholder">
-              <div class="chart-bars">
-                <div v-for="(value, month) in salesData" :key="month" class="chart-bar">
-                  <div class="bar" :style="{ height: value + '%' }"></div>
-                  <span class="bar-label">{{ month }}</span>
-                </div>
-              </div>
-            </div>
+            <LineChart :labels="revenueLabels" :datasets="revenueDatasets" />
           </div>
         </div>
       </div>
@@ -149,42 +150,118 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
+// import axios from 'axios' // 移除全域 import
+import LineChart from '@/components/LineChart.vue'
 
 const stats = ref({
-  totalProducts: 156,
-  totalOrders: 892,
-  totalRevenue: 1250000,
-  totalCustomers: 234
+  totalProducts: 0,
+  totalOrders: 0,
+  totalRevenue: 0,
+  totalCustomers: 0
 })
 
-const recentActivities = ref([
-  { id: 1, type: 'success', icon: 'bi bi-check-circle', text: '新訂單 #20240601011 已確認', time: '2 分鐘前' },
-  { id: 2, type: 'info', icon: 'bi bi-plus-circle', text: '新增商品「有機肥料D」', time: '15 分鐘前' },
-  { id: 3, type: 'warning', icon: 'bi bi-exclamation-triangle', text: '庫存不足警告：速效肥料C', time: '1 小時前' },
-  { id: 4, type: 'primary', icon: 'bi bi-person-plus', text: '新客戶註冊：張小明', time: '2 小時前' }
-])
+interface Activity {
+  id: number | string
+  type: string
+  icon: string
+  text: string
+  time: string
+}
+const recentActivities = ref<Activity[]>([])
+const salesData = ref({})
+interface Product {
+  id: number | string
+  name: string
+  image: string
+  sales: number
+}
+const popularProducts = ref<Product[]>([])
 
-const salesData = ref({
-  '1月': 65,
-  '2月': 78,
-  '3月': 82,
-  '4月': 75,
-  '5月': 90,
-  '6月': 85
+const loading = ref(true)
+const errorMsg = ref('')
+
+const revenueLabels = ['2月', '3月', '4月', '5月', '6月', '7月']
+const revenueDatasets = [
+  {
+    label: '營收',
+    data: [80000, 95000, 110000, 105000, 120000, 125000],
+    borderColor: '#2E8B57',
+    backgroundColor: 'rgba(46,139,87,0.1)',
+    tension: 0.4,
+    fill: true
+  }
+]
+
+async function fetchDashboard() {
+  loading.value = true
+  errorMsg.value = ''
+  try {
+    // 僅在 client 端才載入 axios 並呼叫
+    if (process.client) {
+      const axios = (await import('axios')).default
+      // 這裡可以寫 axios 實際呼叫 API 的程式碼
+      // 例如：const { data } = await axios.get('/api/dashboard')
+      // 目前用假資料
+    }
+    // 假資料
+    stats.value = {
+      totalProducts: 120,
+      totalOrders: 340,
+      totalRevenue: 1250000,
+      totalCustomers: 85
+    }
+    recentActivities.value = [
+      { id: 1, type: 'success', icon: 'bi bi-check-circle', text: '王小明 剛剛下單了 3 項商品', time: '1 分鐘前' },
+      { id: 2, type: 'danger', icon: 'bi bi-person-plus', text: '新客戶 李小美 註冊成功', time: '5 分鐘前' },
+      { id: 3, type: 'warning', icon: 'bi bi-exclamation-triangle', text: '商品「有機肥料A」庫存低於 10 件', time: '10 分鐘前' },
+      { id: 4, type: 'primary', icon: 'bi bi-box', text: '新商品「速效肥料C」已上架', time: '30 分鐘前' }
+    ]
+    salesData.value = {
+      '1月': 30,
+      '2月': 40,
+      '3月': 60,
+      '4月': 80,
+      '5月': 70,
+      '6月': 90
+    }
+    popularProducts.value = [
+      { id: 1, name: '有機肥料A', image: '/placeholder-images-image_large.webp', sales: 120 },
+      { id: 2, name: '複合肥料B', image: '/placeholder-images-image_large.webp', sales: 95 },
+      { id: 3, name: '速效肥料C', image: '/placeholder-images-image_large.webp', sales: 80 }
+    ]
+  } catch (error) {
+    errorMsg.value = '無法取得資料，請稍後再試。'
+    console.error(error)
+  } finally {
+    loading.value = false
+  }
+}
+
+onMounted(() => {
+  fetchDashboard()
 })
-
-const popularProducts = ref([
-  { id: 1, name: '有機肥料A', sales: 156, image: '/placeholder-images-image_large.webp' },
-  { id: 2, name: '複合肥料B', sales: 142, image: '/placeholder-images-image_large.webp' },
-  { id: 3, name: '速效肥料C', sales: 98, image: '/placeholder-images-image_large.webp' }
-])
 
 function exportData() {
-  // 匯出報表功能
-  console.log('匯出報表')
+  // Example: Export stats as JSON file
+  const dataStr = JSON.stringify({
+    stats: stats.value,
+    recentActivities: recentActivities.value,
+    salesData: salesData.value,
+    popularProducts: popularProducts.value
+  }, null, 2)
+  const blob = new Blob([dataStr], { type: 'application/json' })
+  const url = URL.createObjectURL(blob)
+  const link = document.createElement('a')
+  link.href = url
+  link.download = 'dashboard-report.json'
+  document.body.appendChild(link)
+  link.click()
+  document.body.removeChild(link)
+  URL.revokeObjectURL(url)
 }
 </script>
+
 
 <style scoped>
 .stat-card {
@@ -254,7 +331,7 @@ function exportData() {
 }
 
 .activity-icon.success { background: var(--color-success); color: white; }
-.activity-icon.info { background: var(--color-info); color: white; }
+.activity-icon.danger{ background: var(--color-info); color: white; }
 .activity-icon.warning { background: var(--color-warning); color: white; }
 .activity-icon.primary { background: var(--color-primary); color: white; }
 

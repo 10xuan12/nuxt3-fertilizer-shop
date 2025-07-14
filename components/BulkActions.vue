@@ -34,7 +34,7 @@
                 @click="bulkUpdateStatus('inactive')"
                 :disabled="loading"
               >
-                <i class="bi bi-pause-circle text-warning me-2"></i>停用
+                <i class="bi bi-pause-circle text-danger me-2"></i>停用
               </button>
             </li>
             <li><hr class="dropdown-divider"></li>

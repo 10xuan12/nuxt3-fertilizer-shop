@@ -21,6 +21,11 @@
       <div class="mb-2"><strong>收件人：</strong>{{ order.receiver }}</div>
       <div class="mb-2"><strong>收件地址：</strong>{{ order.address }}</div>
       <div class="mb-2"><strong>聯絡電話：</strong>{{ order.phone }}</div>
+      <div class="mb-2"><strong>訂單備註：</strong>{{ order.note || '—' }}</div>
+      <div class="mb-3" v-if="order.status === '待出貨'">
+        <button class="btn btn-success me-2" @click="shipOrder">出貨</button>
+        <button class="btn btn-danger" @click="cancelOrder">取消訂單</button>
+      </div>
       <hr />
       <h5 class="mb-2">商品明細</h5>
       <table class="table table-bordered align-middle">
@@ -34,7 +39,11 @@
         </thead>
         <tbody>
           <tr v-for="item in order.items" :key="item.name">
-            <td>{{ item.name }}</td>
+            <td>
+              <NuxtLink :to="`/products/${item.id || item.name}`" class="text-decoration-underline">
+                {{ item.name }}
+              </NuxtLink>
+            </td>
             <td>{{ item.qty }}</td>
             <td>${{ item.price }}</td>
             <td>${{ item.qty * item.price }}</td>
@@ -45,6 +54,7 @@
     </div>
     <div v-else class="alert alert-danger">查無此訂單</div>
   </div>
+
 </template>
 
 <script setup lang="ts">
@@ -54,22 +64,24 @@ import { ref } from 'vue'
 const route = useRoute()
 const router = useRouter()
 
-// 假資料，實際可改為API取得
+// TODO: 之後要串接後端 API，現在用假資料
 const orders = [
   {
     id: '20240601001', customer: '王小明', amount: 1200, status: '待出貨', date: '2024-06-01 10:23',
     receiver: '王小明', address: '台北市信義區松山路1號', phone: '0912345678',
+    note: '請盡快出貨',
     items: [
-      { name: '有機肥料A', qty: 2, price: 500 },
-      { name: '複合肥料B', qty: 1, price: 200 }
+      { id: 'A', name: '有機肥料A', qty: 2, price: 500 },
+      { id: 'B', name: '複合肥料B', qty: 1, price: 200 }
     ]
   },
   {
     id: '20240601002', customer: '李小美', amount: 850, status: '已出貨', date: '2024-06-01 11:05',
     receiver: '李小美', address: '新北市板橋區文化路2號', phone: '0922333444',
+    note: '',
     items: [
-      { name: '速效肥料C', qty: 1, price: 420 },
-      { name: '有機肥料A', qty: 1, price: 430 }
+      { id: 'C', name: '速效肥料C', qty: 1, price: 420 },
+      { id: 'A', name: '有機肥料A', qty: 1, price: 430 }
     ]
   }
 ]
@@ -78,6 +90,15 @@ const order = ref(orders.find(o => o.id === route.params.id))
 
 function goBack() {
   router.push('/orders')
+}
+
+function shipOrder() {
+  // TODO: 串接API，將訂單狀態設為已出貨
+  if (order.value) order.value.status = '已出貨'
+}
+function cancelOrder() {
+  // TODO: 串接API，將訂單狀態設為已取消
+  if (order.value) order.value.status = '已取消'
 }
 </script>
 

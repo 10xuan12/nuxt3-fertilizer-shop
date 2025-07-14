@@ -5,7 +5,7 @@
       <button class="btn btn-light" type="button" data-bs-toggle="offcanvas" data-bs-target="#sidebarMenu">
         <i class="bi bi-list"></i>
       </button>
-      <span class="navbar-brand ms-3 text-white">肥料後台</span>
+      <span class="navbar-brand ms-3 text-white">肥料電商平台後台</span>
       
       <!-- 手機版使用者選單 -->
       <div class="dropdown">
@@ -13,7 +13,7 @@
           <i class="bi bi-person-circle me-1"></i>管理員
         </button>
         <ul class="dropdown-menu dropdown-menu-end">
-          <li><a class="dropdown-item" href="#"><i class="bi bi-person me-2"></i>個人資料</a></li>
+          <li><a class="dropdown-item" href="profile"><i class="bi bi-person me-2"></i>個人資料</a></li>
           <li><hr class="dropdown-divider"></li>
           <li><a class="dropdown-item text-danger" href="#" @click.prevent="logout">
             <i class="bi bi-box-arrow-right me-2"></i>登出
@@ -24,7 +24,7 @@
 
     <!-- 🖥 桌機版側邊欄 -->
     <div class="d-none d-lg-block bg-main text-white p-3 vh-100 shadow-sm sidebar-fixed">
-      <div class="fw-bold fs-4 mb-4 text-center">肥料後台</div>
+      <div class="fw-bold fs-4 mb-4 text-center">肥料電商平台後台</div>
       <SidebarMenu />
       
       <!-- 桌機版使用者選單 -->
@@ -34,7 +34,7 @@
             <i class="bi bi-person-circle me-2"></i>管理員
           </button>
           <ul class="dropdown-menu">
-            <li><a class="dropdown-item" href="#"><i class="bi bi-person me-2"></i>個人資料</a></li>
+            <li><a class="dropdown-item" href="profile"><i class="bi bi-person me-2"></i>個人資料</a></li>
             <li><hr class="dropdown-divider"></li>
             <li><a class="dropdown-item text-danger" href="#" @click.prevent="logout">
               <i class="bi bi-box-arrow-right me-2"></i>登出
@@ -46,9 +46,9 @@
 
     <!-- 📱 手機 offcanvas 側邊欄 -->
     <div class="offcanvas offcanvas-start" tabindex="-1" id="sidebarMenu">
-      <div class="offcanvas-header bg-main text-white">
-        <h5 class="offcanvas-title">管理選單</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="offcanvas"></button>
+      <div class="offcanvas-header bg-main text-white justify-content-between align-items-center">
+        <span class="fw-bold fs-5">肥料電商平台後台</span>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas" aria-label="Close"></button>
       </div>
       <div class="offcanvas-body">
         <SidebarMenu />
@@ -66,13 +66,16 @@
 
 <script setup lang="ts">
 import SidebarMenu from '../components/SidebarMenu.vue'
+import { useRouter } from 'vue-router'
+
+const router = useRouter()
 
 function logout() {
   if (confirm('確定要登出嗎？')) {
     // 這裡可以加入登出邏輯
     console.log('使用者登出')
     // 跳轉到登入頁
-    // navigateTo('/login')
+    router.push('/login')
   }
 }
 </script>

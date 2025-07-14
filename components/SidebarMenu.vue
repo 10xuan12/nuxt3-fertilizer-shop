@@ -8,8 +8,8 @@
       </NuxtLink>
     </li>
     <li class="nav-item mb-2">
-      <NuxtLink to="/products" class="nav-link sidebar-link" active-class="active">
-        <i class="bi bi-box me-2"></i>
+      <NuxtLink to="/stores" class="nav-link sidebar-link" active-class="active">
+        <i class="bi bi-shop-window me-2"></i>
         <span class="menu-text">商家管理</span>
       </NuxtLink>
     </li>
@@ -94,6 +94,33 @@
   
   .sidebar-link {
     padding: 0.6rem 0.8rem;
+  }
+}
+
+/* 手機 offcanvas 側邊欄專用字色修正 */
+.offcanvas .sidebar-link,
+.offcanvas .sidebar-link.active,
+.offcanvas .sidebar-link:hover,
+.offcanvas .sidebar-link:focus,
+.offcanvas .sidebar-link i,
+.offcanvas .menu-text {
+  color: #256b45 !important;
+  background: #fff !important;
+}
+
+@media (max-width: 767px) {
+  .sidebar-menu {
+    font-size: 0.95rem;
+  }
+  .sidebar-link {
+    padding: 0.6rem 0.8rem;
+  }
+  .sidebar-link,
+  .sidebar-link.active,
+  .sidebar-link:hover,
+  .sidebar-link:focus {
+    color: #256b45 !important;
+    background: #fff !important;
   }
 }
 </style>
